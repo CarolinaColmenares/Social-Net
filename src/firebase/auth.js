@@ -13,14 +13,27 @@ import {
   signInWithRedirect,
   signInWithPopup
 } from "./init.js";
+import { getUserData } from './users.js';
 
 
 // Iniciar Sesión
 const login = async (email, password) => {
   try {
+    // SOLAMENTE RETORNA LA INFORMACION DE LA AUTENTIACION -> email, password, accesstoken, uid, ......
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    // 
-    // const userData = await getUserData(userCredential.user.uid)
+
+    /* 
+      {
+        loginfo: {....},
+        user: {
+          email,
+          uid: kdfjkasfoiuqjiu3981yhfkqwju329814ukasjjkfdpau9832147lkfjadsfh3h12
+        }
+      }
+    
+    kdfjkasfoiuqjiu3981yhfkqwju329814ukasjjkfdpau9832147lkfjadsfh3h12
+    */
+    const userData = await getUserData(userCredential.user.uid) //para tener la inf extra del usuario en base al uid (birt, nombre, type)
     /* 
       {
         username: '',
@@ -28,9 +41,11 @@ const login = async (email, password) => {
         birthday: ''
       }
     */
-    // localStorage.setItem('userData', JSON.stringify(userData))
+    localStorage.setItem('userData', JSON.stringify({...userData, id: userCredential.user.uid}))
     alert('Sesión iniciada correctamente')
-    showTemplates('#/home')
+    window.location.href = '#/home' 
+
+    // ESTE RETURN HASTA EL MOMENTO NO HACE NADA YA QUE ESTA FUNCION UNICAMENTE SE ENCARGA DE EJECTUAR EL INICIO DE SESION
     return userCredential;
   } catch (error) {
     if (error == 'FirebaseError: Firebase: Error (auth/invalid-email).'){
@@ -38,24 +53,9 @@ const login = async (email, password) => {
     } else if (error == 'FirebaseError: Firebase: Error (auth/wrong-password).'){
       alert ('Contraseña invalida')
     }
-    else if (error == 'FirebaseError: Firebase: Error (auth/user-not-found).'){
-      alert('Usuario no encontrado')
-    }
     throw error.message;
   }
 };
-
-// Registro de usuario
-/* 
-
-user = {
-  username: 'pepito',
-  birhtdaty: '20200,
-  userType: 'baker',
-  userPosts: [idPost1, idPost2, idPost3, ........]
-}
-
-*/
 
 const signup = async (data) => {
   /* 
@@ -69,26 +69,26 @@ const signup = async (data) => {
     }
   */
   try {
-    const userCredential = await createUserWithEmailAndPassword(auth, data?.email, data?.password);
+    const response = await createUserWithEmailAndPassword(auth, data?.email, data?.password);
 
     const userFirestoreRegister = await setDoc(
-      doc(db, "users", userCredential.user.uid), 
+      doc(db, "users", response.user.uid), 
       { 
         username: data?.username,
         birthday: data?.birthday,
         userType: data?.userType
       }
     )
-    showTemplates('#/home')
-    return userCredential;
+
+    window.location.href = '#/home' 
+    return response;
   } catch (error) {
     if (error == 'FirebaseError: Firebase: Error (auth/invalid-email).'){
-      alert('Correo invalido Ej: 1234@micorreo.com.')
-    } else if (error == 'FirebaseError: Firebase: Password should be at least 6 characters (auth/weak-password).'){
-      alert ('La contraseña debe tener 6 o mas caracteres.')
-    } else if (error == 'FirebaseError: Firebase: Error (auth/email-already-in-use).'){
-      alert ('Este correo ya tiene una cuenta asociada.')
-    }
+      alert('Correo invalido Ej: 1234@micorreo.com')
+    } else if (error == 'FirebaseError: Password should be at least 6 characters (auth/weak-password).'){
+      alert ('La contraseña debe tener 6 o mas caracteres')
+    } else if (error == 'FirebaseError: Firebase: Error (auth/email-already-in-use).')
+      alert ('Este correo ya tiene una cuenta asociada')
     throw error.message;
   } 
 };
@@ -97,8 +97,21 @@ const signup = async (data) => {
 const googleLogin = async () => {
   try {
     const response = await signInWithPopup(auth, provider);
-    showTemplates('#/home')
-    console.log(response);
+    const userData = {
+      id: response.user.uid,
+      username: response.user.displayName,
+      userType: 'eater'
+    }
+
+    const userFirestoreRegister = await setDoc(
+      doc(db, "users", response.user.uid), userData
+    )
+
+    localStorage.setItem('userData', JSON.stringify(userData))
+
+    console.log(response.user)
+
+    window.location.href = '#/home' 
     return response.user;
   } catch (error) {
     console.log(error.message)
@@ -113,7 +126,7 @@ const googleLogin = async () => {
 const logout = async () => {
   try {
     const response = await signOut(auth);
-    // localStorage.removeItem('userData')
+    localStorage.removeItem('userData')
     window.location = '#/'
     showTemplates('#/')
     alert('La sesión se cerró exitosamente')
@@ -125,7 +138,24 @@ const logout = async () => {
 
 export { login, logout, signup, googleLogin, auth, onAuthStateChanged };
 
+//Iniciar sesion con google
 
+
+// ************************************************
+// import { showTemplates } from './../lib/router.js';
+// import {
+//   auth,
+//   onAuthStateChanged,
+//   signInWithEmailAndPassword,
+//   createUserWithEmailAndPassword,
+//   setDoc,
+//   db,
+//   doc,
+//   signOut,
+//   provider,
+//   signInWithPopup
+// } from "./init.js";
+// //import { async } from 'regenerator-runtime';
 
 
 // // Iniciar Sesión
@@ -173,6 +203,20 @@ export { login, logout, signup, googleLogin, auth, onAuthStateChanged };
 //     throw error.message;
 //   }
 // };
+// // Cerrar sesion
+// const logout = async () => {
+//   try {
+//     const response = await signOut(auth);
+//     showTemplates('#/')
+//     alert('La sesión se cerró exitosamente')
+//     return response;
+//   } catch (error) {
+//     throw error.message;
+//   }
+// };
 
+// export { login, logout, signup, googleLogin, auth, onAuthStateChanged}; /* */
+
+// //Iniciar sesion con google
 
 

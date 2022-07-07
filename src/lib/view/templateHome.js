@@ -1,8 +1,9 @@
 import { logout } from '../../firebase/auth.js';
-import { getAllPosts } from '../../firebase/post.js';
+import { getAllPosts, handleLikePost } from '../../firebase/post.js';
 import { getUserPostData } from '../../firebase/users.js';
 
 export const home = () => {
+    const userData = JSON.parse(localStorage.getItem('userData'))
     const divHome = document.createElement('div');
     divHome.setAttribute('id', 'divContainerHome');
     const viewHome = `
@@ -14,7 +15,7 @@ export const home = () => {
             <a href="#/userProfile" class="selected">
                 <div class="option">
                     <i class="fa-solid fa-circle-user fa-xl" title="Perfil" ></i>
-                    <h4> Mi perfil</h4>
+                    <h4> nombre usuario titulo</h4>
                 </div>
             </a>
             <a href="#/home">
@@ -29,10 +30,10 @@ export const home = () => {
                     <h4>Buscar</h4>
                 </div>
             </a>
-            <a id= "logoutButton">
+            <a id="logoutButton">
                 <div class="option">
                     <i class="fa-solid fa-arrow-right-from-bracket fa-xl" title="Cerrar sesión"></i>
-                    <h4>Cerrar sesión</h4>
+                    <h4>Cerrar cesion</h4>
                 </div>
             </a>
         </div>
@@ -48,41 +49,43 @@ const postMain = divHome.querySelector('.postMain');
 
 
 getAllPosts() //trae todo los post
-    .then((postList) => {
-        postList.forEach((post) => { //trae todos los post filtrados
-            getUserPostData(post.idUser)//uid especifico de cada post
+    .then((postsList) => {
+        postsList.forEach((posts) => { //trae todos los post filtrados
+            getUserPostData(posts.idUser)//uid especifico de cada post
         .then((users) => {
-            const date = new Date(Number(post.createdAt) * 1000).toLocaleDateString()
             const postElement = document.createElement('div'); 
             postElement.setAttribute('class', 'postBody') 
 
             postElement.innerHTML = `
                             <div class="userNav">
-                                <div class="userIcon">
+                                <div class="item1">
                                     <i class="fa-solid fa-circle-user fa-3x"></i>
                                 </div>
-                                <div class="userName">
-                                    <p>${users.username}</p>
+                                <div class="item2">
+                                    <p>${users?.username ? users?.username : 'INVITADO'}</p>
                                 </div>
-                                <div class="userTitle">
-                                <p>${users.userType}</p>
-                        </div>
-                        <div class="userDate">
-                            <p class="date">${date}</p>
-                        </div>
+                                <div class="item3">
+                                    <p>${users?.userType ? users?.userType : 'INVITADO'}</p>
+                                </div>
                             </div>
 
                             <div class="post">
-                                <h2>${post?.text}</h2> 
+                                <h2>${posts?.text}</h2> 
                             </div>
                             <div class="like">
-                                <div>
-                                    <img src="img/cuplike.png" class ="cupcakeImg" alt="cuplike">
+                                <div class="likes">
+                                <img src="img/cuplike.png" class ="cupcakeImg" alt="cuplike">
+                                <h4>${posts?.likes?.length}</h4>
                                 </div>
                             </div>
                         `;
 
             postMain.appendChild(postElement);
+
+            const likeButton = postElement.querySelector('.like')
+            likeButton.addEventListener('click', () => {
+                handleLikePost(posts.id, userData.id)
+            })
         });
     });
 });

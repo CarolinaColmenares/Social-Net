@@ -1,6 +1,6 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.8.2/firebase-app.js';
 import {
-  getFirestore, doc, setDoc, collection, addDoc, query, where, getDocs, getDoc, orderBy, deleteDoc
+  getFirestore, doc, setDoc, collection, addDoc, query, where, getDocs, getDoc, deleteDoc, orderBy, arrayUnion, arrayRemove
 } from 'https://www.gstatic.com/firebasejs/9.8.2/firebase-firestore.js';
 
 import { firebaseConfig } from './config.js';
@@ -34,9 +34,12 @@ export {
   addDoc,
   getDocs,
   getDoc,
+  deleteDoc,
   query,
   orderBy,
   where,
+  arrayUnion,
+  arrayRemove,
   signInWithPopup,
   provider,
   createUserWithEmailAndPassword,
@@ -46,6 +49,5 @@ export {
   getRedirectResult,
   GoogleAuthProvider,
   signOut,
-  deleteDoc,
   sendEmailVerification,
 };

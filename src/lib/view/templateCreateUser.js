@@ -1,4 +1,5 @@
 import { signup } from '../../firebase/auth.js';
+import { doc, setDoc } from '../../firebase/init.js';
 
 export const createUser = () => {
     const divCreateUser = document.createElement('div')
@@ -9,7 +10,7 @@ export const createUser = () => {
         </div>
         <div id="userCreationContainer">
             <p class="instruction">Ingresa tus datos personales</p>
-            <form>
+            <form action="FIREBASE??">
                 <div id="input-container">
                     <input type="text" name="userName" id="userName_id" placeholder="Nombre personal o de tu marca">
                     <input type="date" name="userDateOfBirth" id="dateOfBirth" placeholder="Fecha de nacimiento">
@@ -21,36 +22,38 @@ export const createUser = () => {
             <div class="radioButtons">
                 <div class="radioButtonContainer">
                     <img src="img/Baker.png" width=80px>
-                    <input type="radio" id="bakerOption_id" name="userType" value="Baker" checked>
+                    <input type="radio" id="bakerOption_id" name="userType" value="baker" checked>
                 </div>
 
                 <div class="radioButtonContainer">
                 <img src="img/eater.png" width=80px>
-                    <input type="radio" id="eaterOption_id" name="userType" value="Eater">
+                    <input type="radio" id="eaterOption_id" name="userType" value="eater">
                 </div>
             </div>
             <button class="buttons" id="newUser">Crear usuario</button>
             </div>
         </div>
         `
-        
-    
+ 
         divCreateUser.innerHTML = viewCreateUser;
         const btn = divCreateUser.querySelector("#newUser")
         btn.addEventListener("click", () => {
             const username = divCreateUser.querySelector("#userName_id").value;
+            const userType = divCreateUser.querySelector('input[name="userType"]:checked').value;           
+            const email = divCreateUser.querySelector('#userMail_id').value;           
             const password = divCreateUser.querySelector("#userPassword_id").value;
             const birthday = divCreateUser.querySelector("#dateOfBirth").value
-            const userType = divCreateUser.querySelector('input[name="userType"]:checked').value;
-            const email = divCreateUser.querySelector("#userMail_id").value;
+
 
             const data = {username, email, password, birthday, userType}
             
-            if (!birthday || !username){
-                alert('Debes ingresar todos tus datos');
-            }else {
+            if (username, birthday == '' || null || undefined){
+                alert('Debes llenar todos los campos');
+            } else {
                 signup(data)
             }
+
+        
         })
         
 
